@@ -1,12 +1,8 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addsingle') }}</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addmore') }}</el-button>
-      <div class="high-search">
-        高级检索
-      </div>
-      <el-input v-model="listQuery.title" :placeholder="$t('table.title')" style="width: 300px;float:right">
+      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addCompany') }}</el-button>
+      <el-input v-model="listQuery.title" :placeholder="$t('table.userSearch')" style="width: 300px;float:right">
         <el-button slot="append" icon="el-icon-search" type="success" @keyup.enter.native="handleFilter" />
       </el-input>
     </div>
@@ -241,12 +237,12 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        uuid: 1,
+        companyName: '百度网络科技有限公司',
+        businessLicense: '',
+        businessLicenseId: new Date(),
+        managerPhone: '18910738292',
+        managerName: '我是老楚'
       }
     },
     handleCreate() {

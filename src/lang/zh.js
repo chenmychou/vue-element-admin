@@ -1,21 +1,10 @@
 export default {
   route: {
     dashboard: '首页',
-    introduction: '简述',
-    documentation: '文档',
-    guide: '引导页',
-    permission: '权限测试页',
+    permission: '系统管理',
     rolePermission: '角色权限',
     pagePermission: '页面权限',
     directivePermission: '指令权限',
-    icons: '图标',
-    components: '组件',
-    componentIndex: '介绍',
-    tinymce: '富文本编辑器',
-    markdown: 'Markdown',
-    jsonEditor: 'JSON编辑器',
-    dndList: '列表拖拽',
-    splitPane: 'Splitpane',
     avatarUpload: '头像上传',
     dropzone: 'Dropzone',
     sticky: 'Sticky',
@@ -67,7 +56,7 @@ export default {
     externalLink: '外链'
   },
   navbar: {
-    logOut: '退出登录',
+    logOut: '退出',
     dashboard: '首页',
     github: '项目地址',
     theme: '换肤',
@@ -110,6 +99,17 @@ export default {
     imageUploadTips: '由于我在使用时它只有vue@1版本，而且和mockjs不兼容，所以自己改造了一下，如果大家要使用的话，优先还是使用官方版本。'
   },
   table: {
+    addsingle: '单次入库',
+    addmore: '批量导入',
+    addCompany: '新增企业',
+    addUser: '新增用户',
+
+    userSearch: '输入用户名搜索',
+
+    id: '序号',
+    chinaName: '中文名',
+    englishName: '英文名',
+
     dynamicTips1: '固定表头, 按照表头顺序排序',
     dynamicTips2: '不固定表头, 按照点击顺序排序',
     dragTips1: '默认顺序',
@@ -122,7 +122,6 @@ export default {
     add: '添加',
     export: '导出',
     reviewer: '审核人',
-    id: '序号',
     date: '时间',
     author: '作者',
     readings: '阅读数',

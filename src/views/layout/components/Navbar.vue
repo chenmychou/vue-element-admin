@@ -1,74 +1,44 @@
 <template>
   <div class="navbar">
     <hamburger :toggle-click="toggleSideBar" :is-active="sidebar.opened" class="hamburger-container"/>
-
-    <breadcrumb class="breadcrumb-container"/>
-
+    <!-- <breadcrumb class="breadcrumb-container"/> -->
+    <div class="navbar-title">罐头食品标准数据库管理后台</div>
     <div class="right-menu">
-      <template v-if="device!=='mobile'">
-        <search class="right-menu-item" />
-
-        <error-log class="errLog-container right-menu-item hover-effect"/>
-
-        <screenfull class="right-menu-item hover-effect"/>
-
-        <el-tooltip :content="$t('navbar.size')" effect="dark" placement="bottom">
-          <size-select class="right-menu-item hover-effect"/>
-        </el-tooltip>
-
-        <lang-select class="right-menu-item hover-effect"/>
-
-        <el-tooltip :content="$t('navbar.theme')" effect="dark" placement="bottom">
-          <theme-picker class="right-menu-item hover-effect"/>
-        </el-tooltip>
-      </template>
-
-      <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
-        <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
-          <i class="el-icon-caret-bottom"/>
-        </div>
-        <el-dropdown-menu slot="dropdown">
-          <router-link to="/">
-            <el-dropdown-item>
-              {{ $t('navbar.dashboard') }}
-            </el-dropdown-item>
-          </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-element-admin/">
-            <el-dropdown-item>
-              {{ $t('navbar.github') }}
-            </el-dropdown-item>
-          </a>
-          <el-dropdown-item divided>
-            <span style="display:block;" @click="logout">{{ $t('navbar.logOut') }}</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
+      <span class="role_name">
+        {{ todayDate }}
+      </span>
+      <span class="role_name">
+        {{ roleName }}
+      </span>
+      <span @click="logout">{{ $t('navbar.logOut') }}</span>
     </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import Breadcrumb from '@/components/Breadcrumb'
+// import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-import ErrorLog from '@/components/ErrorLog'
-import Screenfull from '@/components/Screenfull'
-import SizeSelect from '@/components/SizeSelect'
-import LangSelect from '@/components/LangSelect'
-import ThemePicker from '@/components/ThemePicker'
-import Search from '@/components/HeaderSearch'
-
+import moment from 'moment'
+const dateMap = {
+  0: '日',
+  1: '一',
+  2: '二',
+  3: '三',
+  4: '四',
+  5: '五',
+  6: '六'
+}
 export default {
   components: {
-    Breadcrumb,
-    Hamburger,
-    ErrorLog,
-    Screenfull,
-    SizeSelect,
-    LangSelect,
-    ThemePicker,
-    Search
+    // Breadcrumb,
+    Hamburger
+  },
+  data() {
+    return {
+      roleName: '',
+      todayDate: moment().format('YYYY年MM月DD日') + '星期' + dateMap[moment().day()]
+    }
   },
   computed: {
     ...mapGetters([
@@ -77,6 +47,10 @@ export default {
       'avatar',
       'device'
     ])
+  },
+  created() {
+    this.roleName = this.$store.state.user.name
+    console.log('', this.$store.state)
   },
   methods: {
     toggleSideBar() {
@@ -95,7 +69,8 @@ export default {
 .navbar {
   height: 50px;
   overflow: hidden;
-
+  background: #f44336;
+  color: #9e9e9e;
   .hamburger-container {
     line-height: 46px;
     height: 100%;
@@ -107,21 +82,24 @@ export default {
       background: rgba(0, 0, 0, .025)
     }
   }
-
-  .breadcrumb-container {
+  .navbar-title{
     float: left;
-  }
-
-  .errLog-container {
-    display: inline-block;
-    vertical-align: top;
+    line-height: 46px;
+    height: 100%;
+    color: #f4f4f4;
+    font-size: 18px;
+    font-weight: 600;
   }
 
   .right-menu {
     float: right;
     height: 100%;
     line-height: 50px;
-
+    color: #f4f4f4;
+    margin-right: 20px;
+    .role_name {
+      margin-right: 20px;
+    }
     &:focus {
       outline: none;
     }
@@ -140,30 +118,6 @@ export default {
 
         &:hover {
           background: rgba(0, 0, 0, .025)
-        }
-      }
-    }
-
-    .avatar-container {
-      margin-right: 30px;
-
-      .avatar-wrapper {
-        margin-top: 5px;
-        position: relative;
-
-        .user-avatar {
-          cursor: pointer;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-        }
-
-        .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 25px;
-          font-size: 12px;
         }
       }
     }

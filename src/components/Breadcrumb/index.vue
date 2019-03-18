@@ -65,7 +65,7 @@ export default {
     line-height: 50px;
     margin-left: 8px;
     .no-redirect {
-      color: #97a8be;
+      color: #9e9e9e;
       cursor: text;
     }
   }
