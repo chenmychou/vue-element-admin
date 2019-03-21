@@ -1,194 +1,578 @@
 <template>
   <div class="app-container">
+    <el-row style="margin: 0px 0 20px 10px;">
+      <el-button size="large" v-for="tab in tabs" :class="tab.active? 'tab_active' : ''" :key="tab.type" @click="changeTab(tab)">{{ tab.tabName }}</el-button>
+    </el-row>
     <div class="filter-container">
-      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addCompany') }}</el-button>
-      <el-input v-model="listQuery.title" :placeholder="$t('table.userSearch')" style="width: 300px;float:right">
+      <el-button v-if="curTab === 1" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addCompany') }}</el-button>
+      <el-button v-if="curTab === 2" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addUser') }}</el-button>
+      <el-button v-if="curTab === 3" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addMaster') }}</el-button>
+      <el-input v-model="listQuery.title" :placeholder="$t('table.title')" style="width: 300px;float:right">
         <el-button slot="append" icon="el-icon-search" type="success" @keyup.enter.native="handleFilter" />
       </el-input>
     </div>
+    <!-- 企业-->
     <el-table
+      v-if="curTab === 1"
       v-loading="listLoading"
       :key="tableKey"
       :data="list"
       border
       fit
       highlight-current-row
-      style="width: 100%;"
+      style="width: 100%;margin-top: 8px"
       @sort-change="sortChange">
-      <el-table-column :label="$t('table.id')" prop="id" sortable="custom" align="center" width="65">
+      <el-table-column :label="$t('table.id')" align="center" width="65">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.date')" width="150px" align="center">
+      <el-table-column :label="$t('table.companyName')"  align="center" width="250">
         <template slot-scope="scope">
-          <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span>{{ scope.row.companyName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.title')" min-width="150px">
+      <el-table-column :label="$t('table.headName')" align="center" width="350">
         <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
+          <span>{{ scope.row.headName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.author')" width="110px" align="center">
+      <el-table-column :label="$t('table.phone')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
+          <span>{{ scope.row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="showReviewer" :label="$t('table.reviewer')" width="110px" align="center">
+      <el-table-column :label="$t('table.createTime')" align="center">
         <template slot-scope="scope">
-          <span style="color:red;">{{ scope.row.reviewer }}</span>
+          <span>{{ scope.row.createTime }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.importance')" width="80px">
+      <el-table-column :label="$t('table.isDelete')" align="center">
         <template slot-scope="scope">
-          <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon"/>
+          <span>
+            <el-switch
+              v-model="scope.row.isDelete === 1"
+              active-color="#13ce66"
+              inactive-color="#ff4949">
+            </el-switch>
+          </span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.readings')" align="center" width="95">
-        <template slot-scope="scope">
-          <span v-if="scope.row.pageviews" class="link-type" @click="handleFetchPv(scope.row.pageviews)">{{ scope.row.pageviews }}</span>
-          <span v-else>0</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.status')" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column :label="$t('table.actions')" align="center" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
-          <el-button v-if="scope.row.status!='published'" size="mini" type="success" @click="handleModifyStatus(scope.row,'published')">{{ $t('table.publish') }}
+          <el-button size="mini" type="success" @click="handleCheckDetail(scope.row,'checkItem')">{{ $t('table.checkItem') }}
           </el-button>
-          <el-button v-if="scope.row.status!='draft'" size="mini" @click="handleModifyStatus(scope.row,'draft')">{{ $t('table.draft') }}
-          </el-button>
-          <el-button v-if="scope.row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">{{ $t('table.delete') }}
-          </el-button>
+          <el-button size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">{{ $t('table.delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <!-- 企业end-->
+    <!-- 企业用户-->
+    <el-table
+      v-if="curTab === 2"
+      v-loading="listLoading"
+      :key="tableKey"
+      :data="list"
+      border
+      fit
+      highlight-current-row
+      style="width: 100%;margin-top: 8px"
+      @sort-change="sortChange">
+      <el-table-column :label="$t('table.id')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.id }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.headImg')"  align="center">
+        <template slot-scope="scope">
+          <span>
+            <img :src="scope.row.headImg" />
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.userId')"  align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.userId }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.userName')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.userName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.userTitle')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.userTitle }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.createTime')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.createTime }}</span>
+        </template>
+      </el-table-column>
+      
+      <el-table-column :label="$t('table.loginTime')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.loginTime }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.isDelete')" align="center">
+        <template slot-scope="scope">
+          <span>
+            <el-switch
+              v-model="scope.row.isDelete === 1"
+              active-color="#13ce66"
+              inactive-color="#ff4949">
+            </el-switch>
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.actions')" align="center" width="300" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
+          <el-button size="mini" type="success" @click="handleCheckDetail(scope.row,'checkItem')">{{ $t('table.checkItem') }}
+          </el-button>
+          <el-button size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">{{ $t('table.delete') }}</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 企业用户end-->
+    <!-- 专家 -->
+    <el-table
+      v-if="curTab === 3"
+      v-loading="listLoading"
+      :key="tableKey"
+      :data="list"
+      border
+      fit
+      highlight-current-row
+      style="width: 100%;margin-top: 8px"
+      @sort-change="sortChange">
+      <el-table-column :label="$t('table.id')" align="center" width="65">
+        <template slot-scope="scope">
+          <span>{{ scope.row.id }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.userId')"  align="center" width="250">
+        <template slot-scope="scope">
+          <span>{{ scope.row.userId }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.userName')" align="center" width="350">
+        <template slot-scope="scope">
+          <span>{{ scope.row.userName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.userTitle')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.userTitle }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.goodField')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.goodField }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.createTime')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.createTime }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.expertIsCert')" align="center">
+        <template slot-scope="scope">
+          <span>
+            <el-switch
+              v-model="scope.row.expertIsCert === 1"
+              active-color="#13ce66"
+              inactive-color="#ff4949">
+            </el-switch>
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.isDelete')" align="center">
+        <template slot-scope="scope">
+          <span>
+            <el-switch
+              v-model="scope.row.isDelete === 1"
+              active-color="#13ce66"
+              inactive-color="#ff4949">
+            </el-switch>
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.actions')" align="center" width="300" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
+          <el-button size="mini" type="success" @click="handleCheckDetail(scope.row,'checkItem')">{{ $t('table.checkItem') }}
+          </el-button>
+          <el-button size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">{{ $t('table.delete') }}</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 专家 end-->
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :pageSize.sync="listQuery.pageSize" @pagination="getList" />
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.type')" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
-          </el-select>
+      <el-form ref="dataForm" :rules="dialogStatus !== 'highSearch' ? rules: null" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item :label="$t('table.uid')" prop="uid">
+          <el-input v-model="temp.uid"/>
         </el-form-item>
-        <el-form-item :label="$t('table.date')" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date"/>
+        <el-form-item :label="$t('table.kid')" prop="uid">
+          <el-input v-model="temp.uid"/>
         </el-form-item>
-        <el-form-item :label="$t('table.title')" prop="title">
-          <el-input v-model="temp.title"/>
+        <el-form-item :label="$t('table.chinaName')" prop="chinaName">
+          <el-input v-model="temp.chinaName"/>
         </el-form-item>
-        <el-form-item :label="$t('table.status')">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item"/>
-          </el-select>
+        <el-form-item :label="$t('table.englishName')" prop="englishName">
+          <el-input v-model="temp.englishName"/>
         </el-form-item>
-        <el-form-item :label="$t('table.importance')">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;"/>
+        <el-form-item :label="$t('table.sourceCas')" prop="sourceCas">
+          <el-input v-model="temp.sourceCas"/>
         </el-form-item>
-        <el-form-item :label="$t('table.remark')">
-          <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.remark" type="textarea" placeholder="Please input"/>
+        <el-form-item :label="$t('table.sourceCi')" prop="sourceCi">
+          <el-input v-model="temp.sourceCi"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.chinaId')" prop="chinaId">
+          <el-input v-model="temp.chinaId"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button @click="dialogFormVisible = false;temp={}">{{ $t('table.cancel') }}</el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
-      </span>
+    <el-dialog :title="textMap['checkDetail']" :visible.sync="checkDetailVisible">
+      <el-form :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item :label="$t('table.uid')">
+          {{temp.uid}}
+        </el-form-item>
+        <el-form-item :label="$t('table.chinaName')">
+          {{temp.chinaName}}
+        </el-form-item>
+        <el-form-item :label="$t('table.englishName')">
+          {{temp.englishName}}
+        </el-form-item>
+        <el-form-item :label="$t('table.sourceCas')">
+          {{temp.sourceCas}}
+        </el-form-item>
+        <el-form-item :label="$t('table.sourceCi')">
+          {{temp.sourceCi}}
+        </el-form-item>
+        <el-form-item :label="$t('table.chinaId')">
+          {{temp.chinaId}}
+        </el-form-item>
+         <el-form-item :label="$t('table.uid')">
+          {{temp.uid}}
+        </el-form-item>
+        <el-form-item :label="$t('table.chinaName')">
+          {{temp.chinaName}}
+        </el-form-item>
+        <el-form-item :label="$t('table.englishName')">
+          {{temp.englishName}}
+        </el-form-item>
+        <el-form-item :label="$t('table.sourceCas')">
+          {{temp.sourceCas}}
+        </el-form-item>
+        <el-form-item :label="$t('table.sourceCi')">
+          {{temp.sourceCi}}
+        </el-form-item>
+        <el-form-item :label="$t('table.chinaId')">
+          {{temp.chinaId}}
+        </el-form-item>
+         <el-form-item :label="$t('table.chinaName')">
+          {{temp.chinaName}}
+        </el-form-item>
+        <el-form-item :label="$t('table.englishName')">
+          {{temp.englishName}}
+        </el-form-item>
+        <el-form-item :label="$t('table.sourceCas')">
+          {{temp.sourceCas}}
+        </el-form-item>
+        <el-form-item :label="$t('table.sourceCi')">
+          {{temp.sourceCi}}
+        </el-form-item>
+        <el-form-item :label="$t('table.chinaId')">
+          {{temp.chinaId}}
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="checkDetailSubmit">{{ $t('table.confirm') }}</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
-import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
+import moment from 'moment'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China1111' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
-
-// arr to obj ,such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
+let listCompany = {
+        total: 20,
+        items: [
+          {
+            id: 1,
+            "companyId": 1001,
+            "companyName": "郝工好公司",
+            "cardNo": "企业代码001",
+            "headName": "老张",
+            "phone": "13974999769",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },
+          {
+            "companyId": 1001,
+            id: 2,
+            "companyName": "郝工好公司",
+            "cardNo": "企业代码001",
+            "headName": "老张",
+            "phone": "13974999769",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },
+          {
+            "companyId": 1001,
+            id: 3,
+            "companyName": "郝工好公司",
+            "cardNo": "企业代码001",
+            "headName": "老张",
+            "phone": "13974999769",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },
+          {
+            "companyId": 1001,
+            id: 4,
+            "companyName": "郝工好公司",
+            "cardNo": "企业代码001",
+            "headName": "老张",
+            "phone": "13974999769",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },
+          {
+            "companyId": 1001,
+            id: 5,
+            "companyName": "郝工好公司",
+            "cardNo": "企业代码001",
+            "headName": "老张",
+            "phone": "13974999769",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },
+          {
+            "companyId": 1001,
+            id: 6,
+            "companyName": "郝工好公司",
+            "cardNo": "企业代码001",
+            "headName": "老张",
+            "phone": "13974999769",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          }]
+      }
+let listUsers = {
+        total: 20,
+        items: [
+          {
+            id: 1,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },
+          {
+            id: 2,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },{
+            id: 3,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },{
+            id: 4,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },{
+            id: 5,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },{
+            id: 6,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          }
+          ]
+      }
+let listMaster = {
+        total: 20,
+        items: [
+          {
+            id: 1,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            expertIsCert: 1,
+            goodField: "JS JAVA PYTHON",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },
+          {
+            id: 2,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            expertIsCert: 1,
+            goodField: "JS JAVA PYTHON",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },{
+            id: 3,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            expertIsCert: 1,
+            goodField: "JS JAVA PYTHON",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },{
+            id: 4,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            expertIsCert: 1,
+            goodField: "JS JAVA PYTHON",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },{
+            id: 5,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            expertIsCert: 1,
+            goodField: "JS JAVA PYTHON",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          },{
+            id: 6,
+            "userId": 1001,
+            "account": "account",
+            "userName": "张三丰",
+            "userPhone": "18216425936",
+            "headImg": "http://aaa.baidu.com/aaa.jpg",
+            "userTitle": "知名开发人员",
+            loginTime: moment().format('YYYY-MM-DD hh:mm:ss'),
+            expertIsCert: 1,
+            goodField: "JS JAVA PYTHON",
+            "isDelete": 1,
+            createTime: moment().format('YYYY-MM-DD hh:mm:ss')
+          }
+          ]
+      }
+const userTabs = [ // 欧盟
+    { tabName: '企业列表', type: 1, active: true },
+    { tabName: '用户列表', type: 2, active: false },
+    { tabName: '专家列表', type: 3, active: false }
+  ]
 
 export default {
-  name: 'ComplexTable',
+  name: 'publicTable',
   components: { Pagination },
-  directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    },
-    typeFilter(type) {
-      return calendarTypeKeyValue[type]
-    }
-  },
   data() {
     return {
+      tabs: userTabs,
+      curTab: 1,
       search: '',
       tableKey: 0,
-      list: null,
+      list: [],
       total: 0,
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
+        pageSize: 20,
+        sourceType: 1, // 资源类型   1-中国欧盟，2-中国韩国
+        content: '', // 搜索内容
+        // sort: '+id'
       },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      statusOptions: ['published', 'draft', 'deleted'],
-      showReviewer: false,
       temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
       },
       dialogFormVisible: false,
+      checkDetailVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '编辑',
+        create: '新增',
+        allImport: '批量导入',
+        checkDetail: '查看详细',
+        highSearch: '高级检索'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        uid: [{ required: true, message: 'uid is required', trigger: 'blur' }],
+        chinaName: [{ required: true, message: 'chinaName is required', trigger: 'blur' }],
+        englishName: [{ required: true, message: 'englishName is required', trigger: 'blur' }],
+        sourceCas: [{ required: true, message: 'sourceCas is required', trigger: 'blur' }],
+        sourceCi: [{ required: true, message: 'sourceCi is required', trigger: 'blur' }],
+        chinaId: [{ required: true, message: 'chinaId is required', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -197,21 +581,49 @@ export default {
     this.getList()
   },
   methods: {
+    changeTab(item) {
+      let tempTabs = this.tabs
+      this.curTab = item.type
+      let temp = []
+      this.tabs = tempTabs.map(tab => {tab.active = false;return tab;})
+      item.active = true
+      this.getList()
+    },
+    globeSearch() {
+      this.dialogStatus = 'highSearch'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
-
-        // Just to simulate the time of the request
+      setTimeout(() => {
+        if (this.curTab === 1) {
+          this.list = listCompany.items
+        }
+        if (this.curTab === 2) {
+          this.list = listUsers.items
+        }
+        if (this.curTab === 3) {
+          this.list = listMaster.items
+        }
+        this.total = 20
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
-      })
+      }, 1000)
     },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
+    },
+    handleCheckDetail(row, status) {
+      this.checkDetailVisible = true
+      this.temp = Object.assign({}, row) // copy obj
+    },
+    checkDetailSubmit () {
+      this.checkDetailVisible = false
     },
     handleModifyStatus(row, status) {
       this.$message({
@@ -222,31 +634,19 @@ export default {
     },
     sortChange(data) {
       const { prop, order } = data
-      if (prop === 'id') {
+      if (prop === 'uid') {
         this.sortByID(order)
       }
     },
     sortByID(order) {
       if (order === 'ascending') {
-        this.listQuery.sort = '+id'
+        this.listQuery.sort = '+uid'
       } else {
-        this.listQuery.sort = '-id'
+        this.listQuery.sort = '-uid'
       }
       this.handleFilter()
     },
-    resetTemp() {
-      this.temp = {
-        id: undefined,
-        uuid: 1,
-        companyName: '百度网络科技有限公司',
-        businessLicense: '',
-        businessLicenseId: new Date(),
-        managerPhone: '18910738292',
-        managerName: '我是老楚'
-      }
-    },
     handleCreate() {
-      this.resetTemp()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -254,26 +654,21 @@ export default {
       })
     },
     createData() {
+      this.temp = {};
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp)
-            this.dialogFormVisible = false
-            this.$notify({
+          this.dialogFormVisible = false
+          this.$notify({
               title: '成功',
               message: '创建成功',
               type: 'success',
               duration: 2000
             })
-          })
         }
       })
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -283,70 +678,36 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
-            this.dialogFormVisible = false
+          this.dialogFormVisible = false
             this.$notify({
               title: '成功',
               message: '更新成功',
               type: 'success',
               duration: 2000
             })
-          })
         }
       })
-    },
-    handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
-    },
-    handleFetchPv(pv) {
-      fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
-      })
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
-        })
-        this.downloadLoading = false
-      })
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
+    }
+  },
+  watch: {
+    '$route': {
+      handler: function(val, oldVal){
+        console.log(val, oldVal);
+      },
+      // 深度观察监听
+      // deep: true
     }
   }
 }
 </script>
 <style scoped>
+.table_change{
+  display: flex;
+  margin: 20px 0;
+}
+.tab_active{
+  background: #8BC34A;
+}
   .high-search{
     text-align: center;
     float: right;

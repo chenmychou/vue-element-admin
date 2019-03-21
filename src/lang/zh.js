@@ -102,10 +102,12 @@ export default {
     addsingle: '单次入库',
     addmore: '批量导入',
     id: '序号',
-    uid: 'uid序号',
+    uid: '欧盟序号',
+    kid: '韩国序号',
 
     addCompany: '新增企业',
     addUser: '新增用户',
+    addMaster: '新增专家',
 
     userSearch: '输入用户名搜索',
 
@@ -117,6 +119,25 @@ export default {
     checkItem: '查看',
     edit: '编辑',
     delete: '删除',
+
+    "companyId": '公司id',
+    "companyName": "公司名称",
+    "cardNo": "企业信用代码",
+    "headName": "负责人",
+    "phone": "电话",
+    "isDelete": "是否禁用",
+    "userId": '用户ID',
+    "account": "账号",
+    "userName": "用户名字",
+    "userPhone": "电话",
+    "headImg": "头像",
+    "userTitle": "职称",
+    "goodField": "擅长领域",
+    "expertIsCert": "是否认证",
+    loginTime: '最近一次登录',
+    createTime: "添加时间",
+
+
 
     dynamicTips1: '固定表头, 按照表头顺序排序',
     dynamicTips2: '不固定表头, 按照点击顺序排序',

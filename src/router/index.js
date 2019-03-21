@@ -59,27 +59,27 @@ export default new Router({
 
 export const asyncRoutes = [
   {
-    path: '/oumeng-table',
+    path: '/european-table',
     component: Layout,
     redirect: 'noredirect',
     children: [
       {
-        path: 'index',
-        component: () => import('@/views/table/complexTable'),
-        name: 'oumengTable',
+        path: '',
+        component: () => import('@/views/table/publicTable'),
+        name: 'europeanTable',
         meta: { title: '中国VS欧盟标准', icon: 'oumeng' }
       }
     ]
   },
   {
-    path: '/america-table',
+    path: '/korea-table',
     component: Layout,
     redirect: 'noredirect',
     children: [
       {
-        path: 'index',
-        component: () => import('@/views/table/complexTable'),
-        name: 'americaTable',
+        path: '',
+        component: () => import('@/views/table/publicTable'),
+        name: 'koreaTable',
         meta: { title: '中国VS韩国标准', icon: 'america' }
       }
     ]
@@ -90,7 +90,7 @@ export const asyncRoutes = [
     redirect: 'noredirect',
     children: [
       {
-        path: 'index',
+        path: '',
         component: () => import('@/views/table/userTable'),
         name: 'userTable',
         meta: { title: '用户管理', icon: 'user' }
@@ -104,7 +104,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/table/complexTable'),
+        component: () => import('@/views/table/answerTable'),
         name: 'answerTable',
         meta: { title: '问答管理', icon: 'answer' }
       }
@@ -117,7 +117,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/table/complexTable'),
+        component: () => import('@/views/table/answerTable'),
         name: 'recheckTable',
         meta: { title: '审核管理', icon: 'recheck' }
       }
@@ -130,7 +130,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/table/complexTable'),
+        component: () => import('@/views/table/answerTable'),
         name: 'feedbackTable',
         meta: { title: '问题反馈', icon: 'feedback' }
       }

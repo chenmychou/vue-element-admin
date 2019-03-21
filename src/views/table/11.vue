@@ -6,7 +6,7 @@
     <div class="filter-container">
       <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addsingle') }}</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-star-off" @click="handleImportCreate">{{ $t('table.addmore') }}</el-button>
-      <div class="high-search">
+      <div class="high-search" @click="globeSearch">
         高级检索
       </div>
       <el-input v-model="listQuery.title" :placeholder="$t('table.title')" style="width: 300px;float:right">
@@ -68,8 +68,11 @@
     </el-table>
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :pageSize.sync="listQuery.pageSize" @pagination="getList" />
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="dialogStatus !== 'highSearch' ? rules: null" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.uid')" prop="uid">
+          <el-input v-model="temp.uid"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.kid')" prop="uid">
           <el-input v-model="temp.uid"/>
         </el-form-item>
         <el-form-item :label="$t('table.chinaName')" prop="chinaName">
@@ -89,7 +92,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button @click="dialogFormVisible = false;temp={}">{{ $t('table.cancel') }}</el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
@@ -232,19 +235,27 @@ let list = {
           }
         ]
       }
+const tabsU = [ // 欧盟
+    { tabName: '禁用成分', kinds: 1, active: true },
+    { tabName: '限用成分', kinds: 2, active: false },
+    { tabName: '着色剂', kinds: 3, active: false },
+    { tabName: '防腐剂', kinds: 4, active: false },
+    { tabName: '防晒剂', kinds: 5, active: false }
+  ]
+const tabsK = [ // 韩国
+    { tabName: '禁用成分', kinds: 1, active: true },
+    { tabName: '限用成分', kinds: 2, active: false },
+    { tabName: '用色素', kinds: 3, active: false },
+    { tabName: '防晒剂', kinds: 4, active: false },
+    { tabName: '染发剂', kinds: 5, active: false },
+    { tabName: '其他准用成分', kinds: 6, active: false }
+  ]
 export default {
-  name: 'ComplexTable',
+  name: 'publicTable',
   components: { Pagination },
   data() {
     return {
-      tabs: [
-        { tabName: '禁用成分', kinds: 1, active: true },
-        { tabName: '限用成分', kinds: 2, active: false },
-        { tabName: '着色剂', kinds: 3, active: false },
-        { tabName: '防腐剂', kinds: 4, active: false },
-        { tabName: '防晒剂', kinds: 5, active: false },
-        { tabName: '染发剂', kinds: 6, active: false }
-      ],
+      tabs: this.$route.path === '/european-table' ? tabsU : tabsK,
       search: '',
       tableKey: 0,
       list: [],
@@ -267,7 +278,8 @@ export default {
         update: '编辑',
         create: '新增',
         allImport: '批量导入',
-        checkDetail: '查看详细'
+        checkDetail: '查看详细',
+        highSearch: '高级检索'
       },
       rules: {
         uid: [{ required: true, message: 'uid is required', trigger: 'blur' }],
@@ -281,6 +293,13 @@ export default {
     }
   },
   created() {
+    // let { path } = this.$route
+    // console.log('path===>>', path)
+    // if(path = '/european-table'){
+    //   this.tabs = this.tabsU
+    // } else {
+    //   this.tabs = this.tabsK
+    // }
     this.getList()
   },
   methods: {
@@ -289,8 +308,14 @@ export default {
       let temp = []
       this.tabs = tempTabs.map(tab => {tab.active = false;return tab;})
       item.active = true
-      console.log('tabs===>>', this.tabs)
       this.getList()
+    },
+    globeSearch() {
+      this.dialogStatus = 'highSearch'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
     },
     getList() {
       this.listLoading = true
@@ -309,9 +334,6 @@ export default {
     handleCheckDetail(row, status) {
       this.checkDetailVisible = true
       this.temp = Object.assign({}, row) // copy obj
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
     },
     checkDetailSubmit () {
       this.checkDetailVisible = false
@@ -351,6 +373,7 @@ export default {
       this.allImportVisible = false
     },
     createData() {
+      this.temp = {};
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.dialogFormVisible = false
@@ -383,6 +406,15 @@ export default {
             })
         }
       })
+    }
+  },
+  watch: {
+    '$route': {
+      handler: function(val, oldVal){
+        console.log(val, oldVal);
+      },
+      // 深度观察监听
+      // deep: true
     }
   }
 }
