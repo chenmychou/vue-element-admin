@@ -154,12 +154,12 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.userId')"  align="center" width="250">
+      <el-table-column :label="$t('table.userId')"  align="center" width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.userId }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.userName')" align="center" width="350">
+      <el-table-column :label="$t('table.userName')" align="center" width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.userName }}</span>
         </template>
@@ -212,28 +212,38 @@
     </el-table>
     <!-- 专家 end-->
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :pageSize.sync="listQuery.pageSize" @pagination="getList" />
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="dialogStatus !== 'highSearch' ? rules: null" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.uid')" prop="uid">
-          <el-input v-model="temp.uid"/>
+    <el-dialog v-if="curTab === 1" :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :rules="rules" :model="tempCompanyData" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item :label="$t('table.companyName')" prop="companyName">
+          <el-input v-model="tempCompanyData.companyName"/>
         </el-form-item>
-        <el-form-item :label="$t('table.kid')" prop="uid">
-          <el-input v-model="temp.uid"/>
+        <el-form-item :label="$t('table.cardNo')" prop="cardNo">
+          <el-input v-model="tempCompanyData.cardNo"/>
         </el-form-item>
-        <el-form-item :label="$t('table.chinaName')" prop="chinaName">
-          <el-input v-model="temp.chinaName"/>
+        <el-form-item :label="$t('table.cardPic')" prop="cardPic">
+          <!-- <el-button v-if="!tempCompanyData.cardPic" type="primary" icon="el-icon-upload">上传营业执照副本照片</el-button> -->
+          <el-upload
+            class="avatar-uploader"
+            action="https://jsonplaceholder.typicode.com/posts/"
+            :show-file-list="false"
+            :on-success="handlePicSuccess"
+            :before-upload="beforePicUpload">
+            <img :src="dialogImageUrl" class="avatar">
+            <!-- <i v-else class="el-icon-plus avatar-uploader-icon"></i> -->
+          </el-upload>
         </el-form-item>
-        <el-form-item :label="$t('table.englishName')" prop="englishName">
-          <el-input v-model="temp.englishName"/>
+        <el-form-item :label="$t('table.headName')" prop="headName">
+          <el-input v-model="tempCompanyData.headName"/>
         </el-form-item>
-        <el-form-item :label="$t('table.sourceCas')" prop="sourceCas">
-          <el-input v-model="temp.sourceCas"/>
+        <el-form-item :label="$t('table.phone')" prop="phone">
+          <el-input v-model="tempCompanyData.phone"/>
         </el-form-item>
-        <el-form-item :label="$t('table.sourceCi')" prop="sourceCi">
-          <el-input v-model="temp.sourceCi"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.chinaId')" prop="chinaId">
-          <el-input v-model="temp.chinaId"/>
+        <el-form-item :label="$t('table.isDelete')" prop="isDelete">
+          <el-switch
+            v-model="tempCompanyData.isDelete"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -554,6 +564,13 @@ export default {
         content: '', // 搜索内容
         // sort: '+id'
       },
+      tempCompanyData: {
+        "companyName": "郝工好公司",
+        "cardNo": "企业代码001",
+        "headName": "老张",
+        "phone": "13974999769",
+        "isDelete": 1
+      },
       temp: {
       },
       dialogFormVisible: false,
@@ -574,7 +591,9 @@ export default {
         sourceCi: [{ required: true, message: 'sourceCi is required', trigger: 'blur' }],
         chinaId: [{ required: true, message: 'chinaId is required', trigger: 'blur' }]
       },
-      downloadLoading: false
+      downloadLoading: false,
+      dialogPictureVisible: false,
+      dialogImageUrl: 'http://source.zouzhengming.com/MSg6YdvsFb8FDCZRStziw.jpg'
     }
   },
   created() {
@@ -588,13 +607,6 @@ export default {
       this.tabs = tempTabs.map(tab => {tab.active = false;return tab;})
       item.active = true
       this.getList()
-    },
-    globeSearch() {
-      this.dialogStatus = 'highSearch'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
     },
     getList() {
       this.listLoading = true
@@ -687,6 +699,18 @@ export default {
             })
         }
       })
+    },
+    handlePicSuccess(file, fileList) {
+      // 图片上传删除
+      this.dialogImageUrl = 'http://source.zouzhengming.com/MSg6YdvsFb8FDCZRStziw.jpg'
+      console.log(file, fileList);
+    },
+    beforePicUpload() {
+      // 图片上传 预览
+      console.log('file', file)
+      // this.dialogImageUrl = file.url;
+      this.dialogImageUrl = 'http://source.zouzhengming.com/MSg6YdvsFb8FDCZRStziw.jpg'
+      // this.dialogPictureVisible = true;
     }
   },
   watch: {
@@ -714,6 +738,30 @@ export default {
     width: 100px;
     line-height: 60px;
     color: brown;
+  }
+   .avatar-uploader > .el-upload {
+    border: 1px dashed #409EFF;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+    border: 1px dashed #8c939d;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
   }
 </style>
 

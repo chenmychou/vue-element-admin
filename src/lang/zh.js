@@ -123,6 +123,7 @@ export default {
     "companyId": '公司id',
     "companyName": "公司名称",
     "cardNo": "企业信用代码",
+    cardPic: '营业执照',
     "headName": "负责人",
     "phone": "电话",
     "isDelete": "是否禁用",
