@@ -35,6 +35,9 @@ export default {
       'avatar',
       'roles'
     ])
+  },
+  created() {
+    console.log('admin created')
   }
 }
 </script>
