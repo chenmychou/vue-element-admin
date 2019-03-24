@@ -212,7 +212,7 @@
     </el-table>
     <!-- 专家 end-->
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :pageSize.sync="listQuery.pageSize" @pagination="getList" />
-    <el-dialog v-if="curTab === 1" :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+    <el-dialog v-if="curTab === 1" :title="`${textMap[dialogStatus]}企业`" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="tempCompanyData" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.companyName')" prop="companyName">
           <el-input v-model="tempCompanyData.companyName"/>
@@ -241,6 +241,79 @@
         <el-form-item :label="$t('table.isDelete')" prop="isDelete">
           <el-switch
             v-model="tempCompanyData.isDelete"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false;temp={}">{{ $t('table.cancel') }}</el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog v-if="curTab === 2" :title="`${textMap[dialogStatus]}用户`" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :rules="rules" :model="tempUserData" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item :label="$t('table.companyId')" prop="companyId">
+          <el-input v-model="tempUserData.companyId"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.userName')" prop="userName">
+          <el-input v-model="tempUserData.userName"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.userPhone')" prop="userPhone">
+          <el-input v-model="tempUserData.userPhone"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.userPassword')" prop="userPassword">
+          <el-input v-model="tempUserData.userPassword"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.headImg')" prop="headImg">
+          <el-input v-model="tempUserData.headImg"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.userTitle')" prop="userTitle">
+          <el-input v-model="tempUserData.userTitle"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.isDelete')" prop="isDelete">
+          <el-switch
+            v-model="tempUserData.status"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false;temp={}">{{ $t('table.cancel') }}</el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog v-if="curTab === 3" :title="`${textMap[dialogStatus]}专家`" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :rules="rules" :model="tempMasterData" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item :label="$t('table.headImg')" prop="headImg">
+          <el-input v-model="tempMasterData.headImg"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.userName')" prop="userName">
+          <el-input v-model="tempMasterData.userName"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.userPhone')" prop="userPhone">
+          <el-input v-model="tempMasterData.userPhone"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.userPassword')" prop="userPassword">
+          <el-input v-model="tempMasterData.userPassword"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.goodField')" prop="goodField">
+          <el-input v-model="tempMasterData.goodField"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.userTitle')" prop="userTitle">
+          <el-input v-model="tempMasterData.userTitle"/>
+        </el-form-item>
+        <el-form-item :label="$t('table.expertIsCert')" prop="expertIsCert">
+          <el-switch
+            v-model="tempMasterData.expertIsCert"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+        </el-form-item>
+        <el-form-item :label="$t('table.isDelete')" prop="isDelete">
+          <el-switch
+            v-model="tempMasterData.status"
             active-color="#13ce66"
             inactive-color="#ff4949">
           </el-switch>
@@ -565,11 +638,32 @@ export default {
         // sort: '+id'
       },
       tempCompanyData: {
+        // 添加公司信息
         "companyName": "郝工好公司",
         "cardNo": "企业代码001",
         "headName": "老张",
         "phone": "13974999769",
         "isDelete": 1
+      },
+      tempUserData: {
+        // 添加用户信息
+        "companyId": 1001,
+        "userName": "张三丰",
+        "userPhone": "18216425936",
+        "userPassword": "45546546",
+        "headImg": "http://aaa.baidu.com/aaa.jpg",
+        "userTitle": "知名开发人员",
+        "status": 1
+      },
+      tempMasterData: {
+        "userName": "张三丰",
+        "userPhone": "18216425936",
+        "headImg": "http://aaa.baidu.com/aaa.jpg",
+        "userTitle": "知名开发人员",
+        "goodField": "医疗",
+        "expertIsCert": 1,
+        "userPassword": "123456",
+        "status": 1
       },
       temp: {
       },

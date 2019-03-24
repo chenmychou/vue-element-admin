@@ -119,7 +119,6 @@ export default {
     checkItem: '查看',
     edit: '编辑',
     delete: '删除',
-
     "companyId": '公司id',
     "companyName": "公司名称",
     "cardNo": "企业信用代码",
@@ -129,7 +128,7 @@ export default {
     "isDelete": "是否禁用",
     "userId": '用户ID',
     "account": "账号",
-    "userName": "用户名字",
+    "userName": "用户名",
     "userPhone": "电话",
     "headImg": "头像",
     "userTitle": "职称",
@@ -137,6 +136,78 @@ export default {
     "expertIsCert": "是否认证",
     loginTime: '最近一次登录',
     createTime: "添加时间",
+    userPassword: '用户密码',
+    // 问题相关
+    // 提问人姓名，企业名称，提问人职称，问题，是否回答，问题是否公开，审核状态，提问时间，（查看，删除，评论列表）
+    // "userName": "用户名",
+    // "userTitle": "职称",
+    // "companyName": "公司名称",
+    
+    isAnswer: '是否回答',
+    isOpen: '是否公开',
+    questionStatus: "问题审核状态",
+    questionTime: '提问时间',
+    commetsList: '评论列表',
+    content:'问题描述',
+    questionDetail:'问题详情',
+    questionPics: "问题图片",
+    // 评论详情
+    // 显示提问人姓名，企业名称，提问人职称，问题，问题资源图片，问题是否回答，问题是否公开，审核状态，提问时间
+
+
+    // 评论相关
+    // 评论人姓名  评论内容 评论时间  审核操作 删除操作
+    // "userName": "张三",
+    "commentContent": "评论内容",
+    commetStatus: "评论审核状态",
+    commetDetail: '评论详情',
+    // "createTime": 6456546
+    // "status": 1,
+
+    // 评论详情
+    // 评论人ID, 头像，姓名，（企业用户显示职称，专家显示头衔），评论时间，评论内容，评论的资源图片，被评论的（评论ID，评论人姓名），评论审核状态
+
+    "commentId": "评论人ID",
+    "userHeadImg": "头像",
+    // "userName": "张三",
+    // "userTitle": "职称、头衔",
+    "commetTime": "评论时间",
+    commentPics: '评论图集',
+    replyUserName: '被评论者',
+    replyId: '被评论者ID',
+    // status: '审核状态'
+
+
+
+    
+
+    // "commentPics": "http://aa.baidu.com/aaa.jpg,http://aa.baidu.com/bbb.jpg",
+    // "userId": 1001,
+    // "userType": 3,
+    // "userTitle": "高级工程师",
+
+
+
+    // 问题反馈
+
+    "feedbackId": "问题序号",
+    // "userName": "反馈用户",
+    "userType": "用户类型", // 用户类型（2-专家，3-企业用户）
+    "content": "反馈内容",  // 反馈内容
+
+    // 管理员
+    // 管理员ID，管理员姓名，账号，密码，最后登录时间，管理员状态（正常，禁用）可编辑修改，可删除；
+
+    addAdmin: "新增管理员",
+    "adminId": "管理员ID",
+    "account": "管理员账号",
+    "adminName": "管理员姓名",
+    "adminPassword": "管理员密码",
+    "adminPhone": "管理员手机号",
+    "status": "是否禁用",
+    "createTime": "创建时间",
+    "adminType": "管理员类型", // 管理员类型（1-超级管理员，2-普通管理员）
+    "lastLoginTime": "最后登录时间",
 
 
 

@@ -4,13 +4,12 @@
       <el-button size="large" v-for="tab in tabs" :class="tab.active? 'tab_active' : ''" :key="tab.kinds" @click="changeTab(tab)">{{ tab.tabName }}</el-button>
     </el-row>
     <div class="filter-container">
-      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleCreate">{{ $t('table.addsingle') }}</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-star-off" @click="handleImportCreate">{{ $t('table.addmore') }}</el-button>
-      <el-input v-model="listQuery.title" :placeholder="$t('table.title')" style="width: 300px;float:right">
-        <el-button slot="append" icon="el-icon-search" type="success" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.title" :placeholder="$t('table.title')" style="width: 300px;float:right;margin-bottom: 20px">
+        <el-button slot="append" icon="el-icon-search" type="success" @click="handleFilter" />
       </el-input>
     </div>
     <el-table
+      v-if="curTab === 1"
       v-loading="listLoading"
       :key="tableKey"
       :data="list"
@@ -19,144 +18,153 @@
       highlight-current-row
       style="width: 100%;margin-top: 8px"
       @sort-change="sortChange">
-      <el-table-column :label="$t('table.id')" align="center" width="65">
+      <el-table-column :label="$t('table.userName')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
+          <span>{{ scope.row.userName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.uid')" align="center" width="105">
+      <el-table-column :label="$t('table.content')" align="center" min-width="200">
         <template slot-scope="scope">
-          <span>{{ scope.row.uid }}</span>
+          <span>{{ scope.row.content }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.chinaName')"  align="center" width="250">
+      <el-table-column :label="$t('table.userTitle')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.chinaName }}</span>
+          <span>{{ scope.row.userTitle }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.englishName')" align="center" width="350">
+      <el-table-column :label="$t('table.companyName')"  align="center" min-width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.englishName }}</span>
+          <span>{{ scope.row.companyName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.sourceCas')" align="center">
+      <el-table-column :label="$t('table.isAnswer')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.sourceCas }}</span>
+          <span>{{ scope.row.questionZhuanjiaComments || '否' }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.sourceCi')" align="center">
+      <el-table-column :label="$t('table.isOpen')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.sourceCi }}</span>
+          <span>{{ scope.row.isOpen || '否'  }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.chinaId')" align="center" width="100">
+      <el-table-column :label="$t('table.questionStatus')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.chinaId }}</span>
+          <span>{{ scope.row.questionStatus }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.questionTime')" align="center" width="100">
+        <template slot-scope="scope">
+          <span>{{ scope.row.createTime }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
-          <el-button size="mini" type="success" @click="handleCheckDetail(scope.row,'checkItem')">{{ $t('table.checkItem') }}
+          <el-button type="primary" size="mini" style="width:80px" @click="handleCommetList(scope.row)">{{ $t('table.commetsList') }}</el-button>
+          <el-button size="mini" type="success" style="width:80px" @click="handleCheckDetail(scope.row,'checkItem')">{{ $t('table.questionDetail') }}
+          </el-button>
+          <el-button size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">{{ $t('table.delete') }}</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-table
+      v-if="curTab === 2"
+      v-loading="listLoading"
+      :key="tableKey"
+      :data="commentList"
+      border
+      fit
+      highlight-current-row
+      style="width: 100%;margin-top: 8px"
+      @sort-change="sortChange">
+      <el-table-column :label="$t('table.userName')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.userName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.commentContent')" align="center" min-width="300">
+        <template slot-scope="scope">
+          <span>{{ scope.row.commentContent }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.commetTime')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.createTime }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.commetStatus')" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.status }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.actions')" align="center" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button size="mini" type="success" style="width:80px" @click="handleCheckDetail(scope.row,'checkItem')">{{ $t('table.commetDetail') }}
           </el-button>
           <el-button size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">{{ $t('table.delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :pageSize.sync="listQuery.pageSize" @pagination="getList" />
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="dialogStatus !== 'highSearch' ? rules: null" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.uid')" prop="uid">
-          <el-input v-model="temp.uid"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.chinaName')" prop="chinaName">
-          <el-input v-model="temp.chinaName"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.englishName')" prop="englishName">
-          <el-input v-model="temp.englishName"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.sourceCas')" prop="sourceCas">
-          <el-input v-model="temp.sourceCas"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.sourceCi')" prop="sourceCi">
-          <el-input v-model="temp.sourceCi"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.chinaId')" prop="chinaId">
-          <el-input v-model="temp.chinaId"/>
-        </el-form-item>
+    <!-- 问题详情start -->
+    <el-dialog v-if="curTab === 1" :title="textMap['checkDetail']" :visible.sync="checkDetailVisible">
+      <!-- 问题详情 -->
+      <el-form :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item :label="$t('table.userName')">
+          <span>{{ temp.userName }}</span>
+      </el-form-item>
+      <el-form-item :label="$t('table.content')">
+          <span>{{ temp.content }}</span>
+      </el-form-item>
+      <el-form-item :label="$t('table.userTitle')">
+          <span>{{ temp.userTitle }}</span>
+      </el-form-item>
+      <el-form-item :label="$t('table.companyName')">
+          <span>{{ temp.companyName }}</span>
+      </el-form-item>
+      <el-form-item :label="$t('table.isAnswer')">
+          <span>{{ temp.isAnswer || '否' }}</span>
+      </el-form-item>
+      <el-form-item :label="$t('table.isOpen')">
+          <span>{{ temp.isOpen || '否'  }}</span>
+      </el-form-item>
+      <el-form-item :label="$t('table.questionStatus')">
+          <span>{{ temp.questionStatus }}</span>
+      </el-form-item>
+      <el-form-item :label="$t('table.questionPics')">
+          <span>{{ temp.pics }}</span>
+      </el-form-item>
+      <el-form-item :label="$t('table.questionTime')">
+          <span>{{ temp.createTime }}</span>
+      </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false;temp={}">{{ $t('table.cancel') }}</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
+        <el-button type="primary" @click="checkDetailSubmit">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
-    <el-dialog :title="textMap['allImport']" :visible.sync="allImportVisible">
-      <div>
-        下载模板:<a href="##">1.excel</a>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="allImportVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button type="primary" @click="allImportCreat">{{ $t('table.confirm') }}</el-button>
-      </div>
-    </el-dialog>
-    <el-dialog :title="textMap['checkDetail']" :visible.sync="checkDetailVisible">
+    <!-- 问题详情end -->
+    <!-- 评论详情start -->
+    <el-dialog v-if="curTab === 2" :title="textMap['checkDetail']" :visible.sync="checkDetailVisible">
+      <!-- 评论详情 -->
       <el-form :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.uid')">
-          {{temp.uid}}
+        <el-form-item :label="$t('table.userName')" align="center">
+            <span>{{ temp.userName }}</span>
         </el-form-item>
-        <el-form-item :label="$t('table.chinaName')">
-          {{temp.chinaName}}
+        <el-form-item :label="$t('table.commentContent')" align="center" min-width="300">
+            <span>{{ temp.commentContent }}</span>
         </el-form-item>
-        <el-form-item :label="$t('table.englishName')">
-          {{temp.englishName}}
+        <el-form-item :label="$t('table.commetTime')" align="center">
+            <span>{{ temp.createTime }}</span>
         </el-form-item>
-        <el-form-item :label="$t('table.sourceCas')">
-          {{temp.sourceCas}}
-        </el-form-item>
-        <el-form-item :label="$t('table.sourceCi')">
-          {{temp.sourceCi}}
-        </el-form-item>
-        <el-form-item :label="$t('table.chinaId')">
-          {{temp.chinaId}}
-        </el-form-item>
-         <el-form-item :label="$t('table.uid')">
-          {{temp.uid}}
-        </el-form-item>
-        <el-form-item :label="$t('table.chinaName')">
-          {{temp.chinaName}}
-        </el-form-item>
-        <el-form-item :label="$t('table.englishName')">
-          {{temp.englishName}}
-        </el-form-item>
-        <el-form-item :label="$t('table.sourceCas')">
-          {{temp.sourceCas}}
-        </el-form-item>
-        <el-form-item :label="$t('table.sourceCi')">
-          {{temp.sourceCi}}
-        </el-form-item>
-        <el-form-item :label="$t('table.chinaId')">
-          {{temp.chinaId}}
-        </el-form-item>
-         <el-form-item :label="$t('table.chinaName')">
-          {{temp.chinaName}}
-        </el-form-item>
-        <el-form-item :label="$t('table.englishName')">
-          {{temp.englishName}}
-        </el-form-item>
-        <el-form-item :label="$t('table.sourceCas')">
-          {{temp.sourceCas}}
-        </el-form-item>
-        <el-form-item :label="$t('table.sourceCi')">
-          {{temp.sourceCi}}
-        </el-form-item>
-        <el-form-item :label="$t('table.chinaId')">
-          {{temp.chinaId}}
+        <el-form-item :label="$t('table.commetStatus')" align="center">
+            <span>{{ temp.status }}</span>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="checkDetailSubmit">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
+    <!-- 评论详情end -->
   </div>
 </template>
 
@@ -165,86 +173,88 @@ import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 let list = {
-        total: 20,
+        total: 3,
         items: [
           {
-            "sourceId": 1,
-            "id": 1,
-            "uid": 1001,
-            "sourceType": 1,
-            "kinds": 1,
-            "chinaName": "N-5-氯苯哑唑-2-基乙酰胺",
-            "englishName": "N-(5-Chlorobenzoxazol-2-yl) acetamide",
-            "sourceCas": "35783-57-4",
-            "sourceCi": "aafasfafafci",
-            "chinaId": "943"
+            "questionId": 1001,
+            "userId": "1001",
+            "userType": 3,
+            "questionZhuanjiaComments": 10, // 大于0 已回答
+            "isOpen": 1,
+            "pics": "aaa.jpg,bbb.png",
+            createTime: "2019-03-24 12:30:23",
+            "questionStatus": 1,
+            "userName": "老楚",
+            "userTitle": "ceo啊",
+            "companyName": "湖南牛逼互联网公司",
+            createTime: "2019-03-24 12:30:23",
+            content:'我是老楚  我牛不牛逼？'
           },
           {
-            "sourceId": 1,
-            "uid": 1001,
-            "id": 2,
-            "sourceType": 1,
-            "kinds": 1,
-            "chinaName": "N-5-氯苯哑唑-2-基乙酰胺",
-            "englishName": "N-(5-Chlorobenzoxazol-2-yl) acetamide",
-            "sourceCas": "35783-57-4",
-            "sourceCi": "aafasfafafci",
-            "chinaId": "943"
+            "questionId": 1001,
+            "userId": "1001",
+            "userType": 3,
+            "questionZhuanjiaComments": 10, // 大于0 已回答
+            "isOpen": 1,
+            "pics": "aaa.jpg,bbb.png",
+            createTime: "2019-03-24 12:30:23",
+            "questionStatus": 1,
+            "userName": "老楚",
+            "userTitle": "ceo啊",
+            "companyName": "湖南牛逼互联网公司",
+            createTime: "2019-03-24 12:30:23",
+            content:'我是老楚  我牛不牛逼？'
           },
           {
-            "sourceId": 1,
-            "id": 3,
-            "uid": 1001,
-            "sourceType": 1,
-            "kinds": 1,
-            "chinaName": "N-5-氯苯哑唑-2-基乙酰胺",
-            "englishName": "N-(5-Chlorobenzoxazol-2-yl) acetamide",
-            "sourceCas": "35783-57-4",
-            "sourceCi": "aafasfafafci",
-            "chinaId": "943"
-          },
-          {
-            "sourceId": 1,
-            id: 4,
-            "uid": 1001,
-            "sourceType": 1,
-            "kinds": 1,
-            "chinaName": "N-5-氯苯哑唑-2-基乙酰胺",
-            "englishName": "N-(5-Chlorobenzoxazol-2-yl) acetamide",
-            "sourceCas": "35783-57-4",
-            "sourceCi": "aafasfafafci",
-            "chinaId": "943"
-          },
-          {
-            "sourceId": 1,
-            "uid": 1001,
-            id: 5,
-            "sourceType": 1,
-            "kinds": 1,
-            "chinaName": "N-5-氯苯哑唑-2-基乙酰胺",
-            "englishName": "N-(5-Chlorobenzoxazol-2-yl) acetamide",
-            "sourceCas": "35783-57-4",
-            "sourceCi": "aafasfafafci",
-            "chinaId": "943"
+            "questionId": 1001,
+            "userId": "1001",
+            "userType": 3,
+            "questionZhuanjiaComments": 10, // 大于0 已回答
+            "isOpen": 1,
+            "pics": "aaa.jpg,bbb.png",
+            createTime: "2019-03-24 12:30:23",
+            "questionStatus": 1,
+            "userName": "老楚",
+            "userTitle": "ceo啊",
+            "companyName": "湖南牛逼互联网公司",
+            createTime: "2019-03-24 12:30:23",
+            content:'我是老楚  我牛不牛逼？'
           }
         ]
       }
+let commentList = {
+  "total": 100,
+  "page": 1,
+  "pageSize": 10,
+  "items": [
+      {
+          "commentId": 1001,
+          "commentContent": "这条政策好",
+          "commentPics": "http://aa.baidu.com/aaa.jpg,http://aa.baidu.com/bbb.jpg",
+          "userId": 1001,
+          "userHeadImg": "http://aaa.baidu.com/jpg.com",
+          "userName": "张三",
+          "userType": 3,
+          "userTitle": "高级工程师",
+          "status": 1,
+          "createTime": 6456546
+      }
+  ]
+}
 export default {
   name: 'ComplexTable',
   components: { Pagination },
   data() {
     return {
       tabs: [
-        { tabName: '禁用成分', kinds: 1, active: true },
-        { tabName: '限用成分', kinds: 2, active: false },
-        { tabName: '着色剂', kinds: 3, active: false },
-        { tabName: '防腐剂', kinds: 4, active: false },
-        { tabName: '防晒剂', kinds: 5, active: false },
-        { tabName: '染发剂', kinds: 6, active: false }
+        { tabName: '问题列表', type: 1, active: true },
+        { tabName: '评论列表', type: 2, active: false }
       ],
+      curTab: 1,
       search: '',
       tableKey: 0,
       list: [],
+      commentList: [],
       total: 0,
       listLoading: true,
       listQuery: {
@@ -256,6 +266,7 @@ export default {
       },
       temp: {
       },
+      tempCommetData: {},
       dialogFormVisible: false,
       allImportVisible: false,
       checkDetailVisible: false,
@@ -284,6 +295,7 @@ export default {
   methods: {
     changeTab(item) {
       let tempTabs = this.tabs
+      this.curTab = item.type
       let temp = []
       this.tabs = tempTabs.map(tab => {tab.active = false;return tab;})
       item.active = true
@@ -299,22 +311,39 @@ export default {
     getList() {
       this.listLoading = true
       setTimeout(() => {
-        this.list = list.items
+        if (this.curTab === 1) {
+          this.list = list.items
+        } else {
+          this.getCommetList()
+        }
         this.total = 100
         setTimeout(() => {
           this.listLoading = false
-        }, 1.5 * 1000)
-      }, 1000)
+        }, 200)
+      }, 200)
+    },
+    getCommetList() {
+      this.listLoading = true
+      setTimeout(() => {
+        this.commentList = commentList.items
+        this.total = 8
+        setTimeout(() => {
+          this.listLoading = false
+        }, 200)
+      }, 200)
     },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
     },
     handleCheckDetail(row, status) {
+      // 拿详情数据
       this.checkDetailVisible = true
+      console.log('rowwwww', row)
       this.temp = Object.assign({}, row) // copy obj
     },
     checkDetailSubmit () {
+      // 关闭查看详情
       this.checkDetailVisible = false
     },
     handleModifyStatus(row, status) {
@@ -365,13 +394,10 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+    handleCommetList(row) {
+      this.curTab = 2
+      let tempTabs = this.tabs
+      this.changeTab(tempTabs[1])
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {

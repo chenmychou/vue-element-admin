@@ -46,7 +46,7 @@ export const constantRoutes = [
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
         meta: { title: 'dashboard', icon: 'dashboard', noCache: true, affix: true }
-      }
+      },
     ]
   }
 ]
@@ -103,23 +103,10 @@ export const asyncRoutes = [
     redirect: 'noredirect',
     children: [
       {
-        path: 'index',
+        path: '',
         component: () => import('@/views/table/answerTable'),
         name: 'answerTable',
-        meta: { title: '问答管理', icon: 'answer' }
-      }
-    ]
-  },
-  {
-    path: '/recheck-table',
-    component: Layout,
-    redirect: 'noredirect',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/table/answerTable'),
-        name: 'recheckTable',
-        meta: { title: '审核管理', icon: 'recheck' }
+        meta: { title: '问题评论管理', icon: 'answer' }
       }
     ]
   },
@@ -130,49 +117,22 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/table/answerTable'),
+        component: () => import('@/views/table/feedbackTable'),
         name: 'feedbackTable',
         meta: { title: '问题反馈', icon: 'feedback' }
       }
     ]
   },
   {
-    path: '/permission',
+    path: '/system-table',
     component: Layout,
-    redirect: '/permission/index',
-    alwaysShow: true, // will always show the root menu
-    meta: {
-      title: 'permission',
-      icon: 'system',
-      roles: ['admin', 'editor'] // you can set roles in root nav
-    },
+    redirect: 'noredirect',
     children: [
       {
-        path: 'page',
-        component: () => import('@/views/permission/page'),
-        name: 'PagePermission',
-        meta: {
-          title: 'pagePermission',
-          roles: ['admin'] // or you can only set roles in sub nav
-        }
-      },
-      {
-        path: 'directive',
-        component: () => import('@/views/permission/directive'),
-        name: 'DirectivePermission',
-        meta: {
-          title: 'directivePermission'
-          // if do not set roles, means: this page does not require permission
-        }
-      },
-      {
-        path: 'role',
-        component: () => import('@/views/permission/role'),
-        name: 'RolePermission',
-        meta: {
-          title: 'rolePermission',
-          roles: ['admin']
-        }
+        path: 'index',
+        component: () => import('@/views/table/systemTable'),
+        name: 'systemTable',
+        meta: { title: '系统管理', icon: 'system' }
       }
     ]
   },
